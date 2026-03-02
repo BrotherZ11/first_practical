@@ -1,0 +1,22 @@
+{
+  "roles": [
+    {
+      "role_id": "PD-WRL-001",
+      "tasks": ["T1", "T2", "T3", "T4"],
+      "skills": ["S1", "S2", "S3"],
+      "knowledge": ["K1", "K2"]
+    },
+    {
+      "role_id": "DD-WRL-002",
+      "tasks": ["T5", "T6"],
+      "skills": ["S4", "S5"],
+      "knowledge": ["K3", "K4"]
+    },
+    {
+      "role_id": "OM-WRL-003",
+      "tasks": ["T2", "T7"],
+      "skills": ["S6"],
+      "knowledge": ["K5"]
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+Role_ID,Base_Salary,Training_Cost,Outsourcing_Cost,Time_to_Hire,Criticality_Score
+PD-WRL-001,70000,18000,45000,75,1.4
+DD-WRL-002,65000,16000,40000,60,1.3
+OM-WRL-003,60000,12000,35000,45,1.1

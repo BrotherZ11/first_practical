@@ -1,0 +1,4 @@
+{
+  "Ransomware": ["T1", "T2", "T4", "T6"],
+  "SupplyChainCompromise": ["T5", "T7"]
+}

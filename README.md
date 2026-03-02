@@ -1,76 +1,64 @@
 # CISO DSS Optimizer (NICE-aligned)
 
-Script en Python para construir un plan de 2 años que optimiza cobertura de **Tasks, Skills, Knowledge (TKS)** del framework NICE bajo un presupuesto fijo.
+Sistema DSS para apoyar decisiones CISO con optimización multi-objetivo, análisis de brechas y salida ejecutiva.
 
-## Características
+## Entregables incluidos
 
-- Ingesta de datos NICE desde JSON (roles + TKS).
-- Carga de costos organizacionales desde `roles_costs.csv`.
-- Optimización multi-objetivo con pesos configurables:
-  - `Score = w_tasks * Tasks + w_skills * Skills + w_knowledge * Knowledge`.
-- Restricción de presupuesto total (default: **$250,000**).
-- Tres estrategias por rol:
-  - `hire`
-  - `upskill`
-  - `outsource`
-- Priorización proactiva de dominios:
-  - `PD` (Protection & Defense)
-  - `DD` (Design & Development)
-- Cálculo de reducción de riesgo por amenaza usando tareas NICE cubiertas.
+- `dss.py`: CLI con comandos `plan` y `gap`.
+- `DESIGN_DOCUMENT.md`: documento de diseño técnico.
+- `CISO_SLIDES.md`: versión textual de slides ejecutivas.
+- `NICE_MASTER_MAPPING.md`: mapeo de 2 asignaturas del Máster al NICE Framework.
 
-## Estructura esperada de archivos
+## Datos de entrada
 
 ### `nice_tks.json`
-
-```json
-{
-  "roles": [
-    {
-      "role_id": "PD-WRL-001",
-      "tasks": ["T1", "T2"],
-      "skills": ["S1"],
-      "knowledge": ["K1"]
-    }
-  ]
-}
-```
+Contiene roles NICE y su cobertura TKS.
 
 ### `roles_costs.csv`
-
 Columnas obligatorias:
-
 - `Role_ID`
 - `Base_Salary`
 - `Training_Cost`
 - `Outsourcing_Cost`
 - `Time_to_Hire`
 - `Criticality_Score`
+- `Risk_Impact`
+- `Certification_Bonus_Cost`
 
 ### `risk_scenarios.json`
+Escenarios mínimos requeridos:
+- `Ransomware`
+- `SupplyChainCompromise`
+- `DataLeaks`
+- `AuditFailures`
 
-```json
-{
-  "Ransomware": ["T1", "T2"],
-  "SupplyChainCompromise": ["T5"]
-}
-```
-
-## Uso
+## Comando de optimización
 
 ```bash
-python dss.py \
+python dss.py plan \
   --nice fixtures/nice_tks.json \
   --roles fixtures/roles_costs.csv \
   --risk fixtures/risk_scenarios.json \
   --budget 250000 \
-  --w-tasks 0.5 \
-  --w-skills 0.3 \
-  --w-knowledge 0.2
+  --focus soc \
+  --dashboard
 ```
 
-Opcionalmente:
+### Presets de enfoque
+- `--focus soc`: prioriza cobertura operacional (Tasks>Skills>Knowledge).
+- `--focus grc`: prioriza conocimiento de gobierno/riesgo/cumplimiento.
+- `--focus custom`: usa `--w-tasks --w-skills --w-knowledge`.
 
-- `--output plan.json` para guardar salida en archivo JSON.
+## Comando Gap Analysis
+
+```bash
+python dss.py gap \
+  --nice fixtures/nice_tks.json \
+  --current PD-WRL-001,DD-WRL-002 \
+  --target PD-WRL-001,PD-WRL-003,PD-WRL-006,DD-WRL-002,IO-WRL-005
+```
+
+Salida: delta de cobertura entre Current Workforce y Target Workforce, incluyendo `top_missing_tasks`.
 
 ## Pruebas
 

@@ -1,0 +1,34 @@
+{
+  "roles": [
+    {
+      "role_id": "PD-WRL-001",
+      "tasks": ["T1", "T2", "T3", "T4"],
+      "skills": ["S1", "S2", "S3"],
+      "knowledge": ["K1", "K2"]
+    },
+    {
+      "role_id": "PD-WRL-003",
+      "tasks": ["T8", "T9", "T10"],
+      "skills": ["S7", "S8"],
+      "knowledge": ["K6", "K7"]
+    },
+    {
+      "role_id": "PD-WRL-006",
+      "tasks": ["T11", "T12"],
+      "skills": ["S9", "S10"],
+      "knowledge": ["K8"]
+    },
+    {
+      "role_id": "DD-WRL-002",
+      "tasks": ["T5", "T6"],
+      "skills": ["S4", "S5"],
+      "knowledge": ["K3", "K4"]
+    },
+    {
+      "role_id": "IO-WRL-005",
+      "tasks": ["T13", "T14"],
+      "skills": ["S11", "S12"],
+      "knowledge": ["K9", "K10"]
+    }
+  ]
+}

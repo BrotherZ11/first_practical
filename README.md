@@ -44,9 +44,9 @@ python dss.py plan \
   --dashboard
 ```
 
-### Presets de enfoque
-- `--focus soc`: prioriza cobertura operacional (Tasks>Skills>Knowledge).
-- `--focus grc`: prioriza conocimiento de gobierno/riesgo/cumplimiento.
+### Presets de enfoque (valores oficiales)
+- `--focus soc`: `tasks=1.0`, `skills=0.6`, `knowledge=0.3`.
+- `--focus grc`: `tasks=0.4`, `skills=0.8`, `knowledge=1.0`.
 - `--focus custom`: usa `--w-tasks --w-skills --w-knowledge`.
 
 ## Comando Gap Analysis

@@ -24,8 +24,8 @@ DEFAULT_REQUIRED_SCENARIOS = {
 }
 
 FOCUS_PRESETS = {
-    "soc": {"tasks": 0.6, "skills": 0.3, "knowledge": 0.1},
-    "grc": {"tasks": 0.25, "skills": 0.25, "knowledge": 0.5},
+    "soc": {"tasks": 1.0, "skills": 0.6, "knowledge": 0.3},
+    "grc": {"tasks": 0.4, "skills": 0.8, "knowledge": 1.0},
     "custom": None,
 }
 

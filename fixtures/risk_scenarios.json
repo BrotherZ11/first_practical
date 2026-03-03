@@ -1,0 +1,6 @@
+{
+  "Ransomware": ["T1", "T2", "T4", "T9", "T11"],
+  "SupplyChainCompromise": ["T5", "T6", "T14"],
+  "DataLeaks": ["T3", "T8", "T13"],
+  "AuditFailures": ["T10", "T12", "T14"]
+}

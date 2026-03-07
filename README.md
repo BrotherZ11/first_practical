@@ -1,56 +1,61 @@
-# CISO DSS Optimizer (NICE-aligned)
+# CISO DSS Optimizer - NICE Framework Aligned
 
-Sistema DSS para apoyar decisiones CISO con optimización multi-objetivo, análisis de brechas y salida ejecutiva.
+Optimizador de fuerza de trabajo de ciberseguridad alineado con el marco NICE Framework.
 
-## Entregables incluidos
+## 📁 Estructura del Proyecto
 
-- `dss.py`: CLI con comandos `plan` y `gap`.
-- `DESIGN_DOCUMENT.md`: documento de diseño técnico.
-- `CISO_SLIDES.md`: versión textual de slides ejecutivas.
-- `NICE_MASTER_MAPPING.md`: mapeo de 2 asignaturas del Máster al NICE Framework.
+```
+first_practical/
+├── dss.py                     # Punto de entrada principal
+├── dss_modules/               # Módulos refactorizados
+│   ├── __init__.py
+│   ├── models.py              # Modelos de datos y constantes
+│   ├── loaders.py             # Cargadores de datos
+│   ├── optimizer.py           # Algoritmo de optimización
+│   ├── gap_analysis.py        # Análisis de brechas
+│   ├── dashboard.py           # Generación de dashboards
+│   └── cli.py                 # Interfaz de línea de comandos
+├── fixtures/                  # Datos de entrada
+│   ├── nice_tks.json         # Mapeo NICE Framework
+│   ├── roles_costs.csv       # Costos de roles
+│   ├── risk_scenarios.json   # Escenarios de riesgo
+│   └── baseline_workforce.json
+├── output/                    # Resultados de ejecución (generados)
+│   ├── *.json                # Planes en formato JSON
+│   └── *.html                # Dashboards HTML interactivos
+├── tests/                     # Tests unitarios
+│   └── test_dss.py
+└── doc/                       # Documentación
+    ├── README.md              # Documentación principal
+    ├── USAGE_EXAMPLES.md      # Ejemplos de uso
+    ├── DESIGN_DOCUMENT.md     # Documento de diseño
+    ├── CASE_STUDY.md          # Caso de estudio
+    ├── CISO_SLIDES.md         # Presentación ejecutiva
+    ├── DASHBOARD_SUMMARY.md   # Resumen del dashboard
+    ├── NICE_MASTER_MAPPING.md # Mapeo NICE Framework
+    └── ARCHITECTURE.md        # Arquitectura del sistema
 
-## Datos de entrada
+```
 
-### `nice_tks.json`
-Contiene roles NICE y su cobertura TKS.
+## 🚀 Uso Rápido
 
-### `roles_costs.csv`
-Columnas obligatorias:
-- `Role_ID`
-- `Base_Salary`
-- `Training_Cost`
-- `Outsourcing_Cost`
-- `Time_to_Hire`
-- `Criticality_Score`
-- `Risk_Impact`
-- `Certification_Bonus_Cost`
+### Opción 1: Script de Generación Automática
 
-### `risk_scenarios.json`
-Escenarios mínimos requeridos:
-- `Ransomware`
-- `SupplyChainCompromise`
-- `DataLeaks`
-- `AuditFailures`
+Genera múltiples planes de una vez:
 
-### `baseline_workforce.json`
-Define los roles que actualmente existen en la empresa (Baseline Workforce).
+```bash
+python generate_plans.py
+```
 
-Para este proyecto se incluyen:
-- `PD-WRL-001`
-- `PD-WRL-003`
-- `IO-WRL-005`
+Este script genera automáticamente:
 
-## Criterio de optimización
+- Plan SOC (Security Operations Center)
+- Plan GRC (Governance, Risk & Compliance)
+- Plan SOC con mayor presupuesto
 
-El planificador usa una optimización tipo *multiple-choice knapsack* con workforce base: para cada rol selecciona como máximo una acción y busca la combinación que **maximiza el `weighted_score` total** sin superar el `budget`.
+### Opción 2: Generación Manual
 
-Regla de workforce:
-- Si el rol está en `baseline_workforce`, sólo se permite `upskill` (ya existe en la empresa).
-- Si el rol no está en `baseline_workforce`, sólo se permite `hire` (debe contratarse).
-
-Esto evita sesgos por coste mínimo y asegura que, al añadir más filas/valores al CSV, se elija siempre la combinación con mejor score agregado dentro de presupuesto.
-
-## Comando de optimización
+#### Generar Plan Optimizado
 
 ```bash
 python dss.py plan \
@@ -58,29 +63,114 @@ python dss.py plan \
   --roles fixtures/roles_costs.csv \
   --risk fixtures/risk_scenarios.json \
   --baseline-workforce fixtures/baseline_workforce.json \
-  --budget 250000 \
   --focus soc \
-  --dashboard
+  --budget 250000 \
+  --output output/plan.json \
+  --dashboard-file output/soc_dashboard.html
 ```
 
-### Presets de enfoque (valores oficiales)
-- `--focus soc`: `tasks=1.0`, `skills=0.6`, `knowledge=0.3`.
-- `--focus grc`: `tasks=0.4`, `skills=0.8`, `knowledge=1.0`.
-- `--focus custom`: usa `--w-tasks --w-skills --w-knowledge`.
-
-## Comando Gap Analysis
+### Análisis de Brechas
 
 ```bash
 python dss.py gap \
   --nice fixtures/nice_tks.json \
-  --current PD-WRL-001,DD-WRL-002 \
-  --target PD-WRL-001,PD-WRL-003,PD-WRL-006,DD-WRL-002,IO-WRL-005
+  --current "PR-CDA-001,AN-TWA-001,OM-ANA-001" \
+  --target "PR-CDA-001,AN-TWA-001,OM-ANA-001,SP-RSK-001,OV-MGT-001"
 ```
 
-Salida: delta de cobertura entre Current Workforce y Target Workforce, incluyendo `top_missing_tasks`.
+## 📚 Módulos
 
-## Pruebas
+### models.py
+
+Define los modelos de datos principales:
+
+- `RoleCost`: Información de costos de roles
+- `RoleTKS`: Tareas, conocimientos y habilidades
+- `PlanAction`: Acciones del plan
+- `PlanResult`: Resultado de optimización
+
+### loaders.py
+
+Funciones para cargar datos desde archivos:
+
+- `load_nice_tks()`: Carga mapeo NICE
+- `load_role_costs()`: Carga costos de roles
+- `load_risk_scenarios()`: Carga escenarios de riesgo
+- `load_baseline_workforce()`: Carga fuerza de trabajo actual
+
+### optimizer.py
+
+Algoritmo de optimización multiple-choice knapsack:
+
+- `optimize_plan()`: Optimiza selección de roles bajo presupuesto
+- `build_action()`: Construye acción con cálculo de score
+
+### gap_analysis.py
+
+Análisis de brechas de capacidades:
+
+- `gap_analysis()`: Compara fuerza de trabajo actual vs objetivo
+
+### dashboard.py
+
+Generación de visualizaciones:
+
+- `dashboard_text()`: Dashboard texto simple
+- `generate_html_dashboard()`: Dashboard HTML profesional
+- `plan_to_dict()`: Serialización a JSON
+
+### cli.py
+
+Interfaz de línea de comandos:
+
+- `parse_args()`: Parse argumentos CLI
+- `run_plan_command()`: Ejecuta optimización
+- `run_gap_command()`: Ejecuta análisis de brechas
+
+## 🧪 Tests
+
+Ejecuta los tests con pytest:
 
 ```bash
-pytest -q
+pytest tests/test_dss.py -v
 ```
+
+## 📖 Documentación Completa
+
+Consulta la carpeta `doc/` para documentación detallada:
+
+- **README.md**: Documentación principal
+- **USAGE_EXAMPLES.md**: Ejemplos prácticos de uso
+- **DESIGN_DOCUMENT.md**: Diseño técnico del sistema
+- **CASE_STUDY.md**: Estudio de caso completo
+- **ARCHITECTURE.md**: Arquitectura del sistema refactorizado
+
+## 📂 Resultados de Ejecución
+
+Los archivos generados se guardan automáticamente en la carpeta `output/`:
+
+- **JSON files**: Planes de optimización en formato estructurado
+- **HTML files**: Dashboards ejecutivos interactivos con visualizaciones
+
+```bash
+output/
+├── plan.json                  # Plan personalizado
+├── soc_plan.json             # Plan optimizado SOC
+├── executive_dashboard.html  # Dashboard ejecutivo
+└── soc_dashboard.html        # Dashboard SOC
+```
+
+💡 **Tip**: Abre los archivos HTML directamente en tu navegador para ver los dashboards interactivos.
+
+## 🎯 Características
+
+- ✅ Optimización basada en algoritmo multiple-choice knapsack
+- ✅ Alineamiento con NICE Cybersecurity Workforce Framework
+- ✅ Soporte para múltiples estrategias (SOC, GRC, Custom)
+- ✅ Dashboards HTML interactivos con gráficos
+- ✅ Análisis de reducción de riesgo por escenario
+- ✅ Análisis de brechas de capacidades
+
+## 📄 Licencia
+
+MIT License - Ver archivo LICENSE para detalles.

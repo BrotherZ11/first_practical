@@ -225,13 +225,20 @@ def build_action(role_tks: RoleTKS, cost_data: RoleCost, option: str, weights: D
         + weights["knowledge"] * len(knowledge)
     )
 
-    score = base_score * cost_data.criticality_score * (1 + cost_data.risk_impact / 10)
-    score *= role_priority_multiplier(role_tks.role_id)
+    # Los pesos de foco (tasks/skills/knowledge) deben dominar la decisión.
+    # Factores estratégicos (criticidad/riesgo/prioridad) se aplican como ajustes moderados.
+    strategic_multiplier = 1.0
+    strategic_multiplier += max(0.0, cost_data.criticality_score - 1.0) * 0.20
+    strategic_multiplier += max(0.0, cost_data.risk_impact) * 0.10
+    strategic_multiplier += max(0.0, role_priority_multiplier(role_tks.role_id) - 1.0) * 0.25
+
+    score = base_score * strategic_multiplier
 
     if option == "hire":
-        score *= _hiring_speed_multiplier(cost_data.time_to_hire)
+        # Penalización suave por tiempos de contratación altos.
+        score *= 0.8 + (0.2 * _hiring_speed_multiplier(cost_data.time_to_hire))
     elif option == "outsource":
-        score *= 1.05  # respuesta rápida ante exposición operacional
+        score *= 1.03  # ligera ventaja por velocidad de respuesta
 
     return PlanAction(role_tks.role_id, option, cost, score, tasks, skills, knowledge)
 

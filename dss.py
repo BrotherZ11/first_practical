@@ -257,7 +257,7 @@ def optimize_plan(
 
     role_actions: List[List[PlanAction]] = []
     for role_id in available_roles:
-        options = ("upskill",) if role_id in baseline_roles else ("hire",)
+        options = ("upskill",) if role_id in baseline_roles else ("hire","outsource")
         actions = [build_action(roles_tks[role_id], role_costs[role_id], option, weights) for option in options]
         role_actions.append(actions)
 

@@ -257,10 +257,7 @@ def optimize_plan(
 
     role_actions: List[List[PlanAction]] = []
     for role_id in available_roles:
-        # Workforce rule:
-        # - Baseline roles: existentes internamente -> upskill como vía principal.
-        # - Roles no baseline: pueden cubrirse por contratación o outsourcing.
-        options = ("upskill",) if role_id in baseline_roles else ("hire", "outsource")
+        options = ("upskill",) if role_id in baseline_roles else ("hire",)
         actions = [build_action(roles_tks[role_id], role_costs[role_id], option, weights) for option in options]
         role_actions.append(actions)
 

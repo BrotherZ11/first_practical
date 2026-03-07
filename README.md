@@ -46,11 +46,7 @@ El planificador usa una optimización tipo *multiple-choice knapsack* con workfo
 
 Regla de workforce:
 - Si el rol está en `baseline_workforce`, sólo se permite `upskill` (ya existe en la empresa).
-- Si el rol no está en `baseline_workforce`, se permite `hire` o `outsource` (cobertura externa cuando compensa por coste/velocidad).
-
-Sensibilidad de pesos:
-- Los pesos `tasks/skills/knowledge` son el componente principal del score.
-- Criticidad, riesgo, prioridad de dominio y tiempo de contratación se aplican como ajustes moderados para evitar que anulen el efecto de los pesos de foco.
+- Si el rol no está en `baseline_workforce`, sólo se permite `hire` (debe contratarse).
 
 Esto evita sesgos por coste mínimo y asegura que, al añadir más filas/valores al CSV, se elija siempre la combinación con mejor score agregado dentro de presupuesto.
 

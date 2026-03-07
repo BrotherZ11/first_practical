@@ -93,50 +93,14 @@ def test_soc_and_grc_presets_produce_different_scores(tmp_path):
 
 
 
-def test_plan_can_include_outsourcing_for_non_baseline_roles(tmp_path):
+def test_focus_preset_changes_hiring_decision(tmp_path):
     soc_payload = _run_plan("soc", tmp_path / "soc_plan.json")
     grc_payload = _run_plan("grc", tmp_path / "grc_plan.json")
 
-    soc_outsource = [a["role_id"] for a in soc_payload["selected_actions"] if a["option"] == "outsource"]
-    grc_outsource = [a["role_id"] for a in grc_payload["selected_actions"] if a["option"] == "outsource"]
+    soc_hires = sorted([a["role_id"] for a in soc_payload["selected_actions"] if a["option"] == "hire"])
+    grc_hires = sorted([a["role_id"] for a in grc_payload["selected_actions"] if a["option"] == "hire"])
 
-    assert soc_outsource or grc_outsource
-
-
-
-def test_optimizer_can_choose_outsource_when_hire_is_not_feasible():
-    roles_tks = {
-        "R3": RoleTKS(role_id="R3", tasks={"T9"}, skills={"S9"}, knowledge={"K9"}),
-    }
-    role_costs = {
-        "R3": RoleCost(
-            role_id="R3",
-            base_salary=100,
-            training_cost=10,
-            outsourcing_cost=30,
-            time_to_hire=200,
-            criticality_score=2,
-            risk_impact=2,
-            certification_bonus_cost=1,
-        ),
-    }
-    risk_scenarios = {
-        "Ransomware": {"T9"},
-        "SupplyChainCompromise": {"T9"},
-        "DataLeaks": {"T9"},
-        "AuditFailures": {"T9"},
-    }
-
-    result = optimize_plan(
-        roles_tks=roles_tks,
-        role_costs=role_costs,
-        risk_scenarios=risk_scenarios,
-        baseline_roles=set(),
-        budget=100,
-        weights={"tasks": 1.0, "skills": 1.0, "knowledge": 1.0},
-    )
-
-    assert [(a.role_id, a.option) for a in result.selected_actions] == [("R3", "outsource")]
+    assert soc_hires != grc_hires
 
 def test_optimizer_maximizes_score_with_budget_constraint():
     roles_tks = {

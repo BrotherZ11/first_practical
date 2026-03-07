@@ -1,0 +1,16 @@
+{
+  "baseline_workforce": [
+    {
+      "role_id": "PD-WRL-001",
+      "description": "Currently performs basic SIEM/EDR alert monitoring."
+    },
+    {
+      "role_id": "PD-WRL-003",
+      "description": "Currently performs reactive incident handling."
+    },
+    {
+      "role_id": "IO-WRL-005",
+      "description": "General IT operations with only partial security duties."
+    }
+  ]
+}

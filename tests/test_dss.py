@@ -20,6 +20,8 @@ def _run_plan(focus: str, out_path: Path):
         str(ROOT / "fixtures" / "roles_costs.csv"),
         "--risk",
         str(ROOT / "fixtures" / "risk_scenarios.json"),
+        "--baseline-workforce",
+        str(ROOT / "fixtures" / "baseline_workforce.json"),
         "--focus",
         focus,
         "--output",
@@ -41,6 +43,8 @@ def test_plan_cli_with_soc_focus_and_dashboard(tmp_path):
         str(ROOT / "fixtures" / "roles_costs.csv"),
         "--risk",
         str(ROOT / "fixtures" / "risk_scenarios.json"),
+        "--baseline-workforce",
+        str(ROOT / "fixtures" / "baseline_workforce.json"),
         "--focus",
         "soc",
         "--output",
@@ -87,6 +91,17 @@ def test_soc_and_grc_presets_produce_different_scores(tmp_path):
     assert soc_payload["weighted_score"] != grc_payload["weighted_score"]
 
 
+
+
+def test_focus_preset_changes_hiring_decision(tmp_path):
+    soc_payload = _run_plan("soc", tmp_path / "soc_plan.json")
+    grc_payload = _run_plan("grc", tmp_path / "grc_plan.json")
+
+    soc_hires = sorted([a["role_id"] for a in soc_payload["selected_actions"] if a["option"] == "hire"])
+    grc_hires = sorted([a["role_id"] for a in grc_payload["selected_actions"] if a["option"] == "hire"])
+
+    assert soc_hires != grc_hires
+
 def test_optimizer_maximizes_score_with_budget_constraint():
     roles_tks = {
         "R1": RoleTKS(role_id="R1", tasks={"T1", "T2"}, skills={"S1"}, knowledge={"K1"}),
@@ -125,6 +140,7 @@ def test_optimizer_maximizes_score_with_budget_constraint():
         roles_tks=roles_tks,
         role_costs=role_costs,
         risk_scenarios=risk_scenarios,
+        baseline_roles={"R1"},
         budget=80,
         weights={"tasks": 1.0, "skills": 1.0, "knowledge": 1.0},
     )

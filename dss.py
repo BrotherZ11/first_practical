@@ -13,7 +13,7 @@ import csv
 import json
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, Iterable, List, Set
+from typing import Dict, Iterable, List, Set, Tuple
 
 DEFAULT_BUDGET = 250_000.0
 DEFAULT_REQUIRED_SCENARIOS = {
@@ -223,41 +223,44 @@ def optimize_plan(
     if not available_roles:
         raise ValueError("No overlapping Role_ID values between NICE data and roles_costs.csv")
 
-    candidates: List[PlanAction] = []
+    role_actions: List[List[PlanAction]] = []
     for role_id in available_roles:
-        for option in ("hire", "upskill", "outsource"):
-            candidates.append(build_action(roles_tks[role_id], role_costs[role_id], option, weights))
+        actions = [build_action(roles_tks[role_id], role_costs[role_id], option, weights) for option in ("hire", "upskill", "outsource")]
+        role_actions.append(actions)
 
-    candidates.sort(key=lambda a: (a.score_gain / max(a.cost, 1), a.score_gain), reverse=True)
+    budget_cents = int(round(budget * 100))
 
-    selected: List[PlanAction] = []
-    selected_roles: Set[str] = set()
-    cost = 0.0
+    # Multiple-choice knapsack: por cada rol, se elige a lo sumo una acción.
+    # Estado: coste acumulado -> (score total, acciones seleccionadas)
+    dp: Dict[int, Tuple[float, List[PlanAction]]] = {0: (0.0, [])}
+
+    for actions in role_actions:
+        next_dp = dict(dp)  # opción de no seleccionar este rol
+        for used_cost, (used_score, used_actions) in dp.items():
+            for action in actions:
+                action_cost = int(round(action.cost * 100))
+                new_cost = used_cost + action_cost
+                if new_cost > budget_cents:
+                    continue
+
+                new_score = used_score + action.score_gain
+                new_actions = used_actions + [action]
+                current = next_dp.get(new_cost)
+                if current is None or new_score > current[0]:
+                    next_dp[new_cost] = (new_score, new_actions)
+        dp = next_dp
+
+    # Mejor combinación por score; desempate por mayor uso de presupuesto.
+    best_cost_cents, (total_score, selected) = max(dp.items(), key=lambda item: (item[1][0], item[0]))
+    cost = best_cost_cents / 100
+
     covered_tasks: Set[str] = set()
     covered_skills: Set[str] = set()
     covered_knowledge: Set[str] = set()
-    total_score = 0.0
-
-    for action in candidates:
-        if action.role_id in selected_roles:
-            continue
-        if cost + action.cost > budget:
-            continue
-        marginal = (
-            (action.covered_tasks - covered_tasks)
-            or (action.covered_skills - covered_skills)
-            or (action.covered_knowledge - covered_knowledge)
-        )
-        if not marginal:
-            continue
-
-        selected.append(action)
-        selected_roles.add(action.role_id)
-        cost += action.cost
+    for action in selected:
         covered_tasks |= action.covered_tasks
         covered_skills |= action.covered_skills
         covered_knowledge |= action.covered_knowledge
-        total_score += action.score_gain
 
     risk_reduction = {}
     for threat, required_tasks in risk_scenarios.items():

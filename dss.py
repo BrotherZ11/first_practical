@@ -13,7 +13,7 @@ import csv
 import json
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, Iterable, List, Set
+from typing import Dict, Iterable, List, Set, Tuple
 
 DEFAULT_BUDGET = 250_000.0
 DEFAULT_REQUIRED_SCENARIOS = {
@@ -163,6 +163,30 @@ def load_risk_scenarios(path: Path) -> Dict[str, Set[str]]:
     return parsed
 
 
+def load_baseline_workforce(path: Path) -> Set[str]:
+    raw = json.loads(path.read_text(encoding="utf-8"))
+
+    entries = _first_match(raw, ["baseline_workforce", "roles", "work_roles", "data"], raw)
+    if not isinstance(entries, list):
+        raise ValueError("Unsupported baseline_workforce structure")
+
+    baseline_roles = set()
+    for entry in entries:
+        if isinstance(entry, str):
+            role_id = entry.strip()
+        elif isinstance(entry, dict):
+            role_id = _first_match(entry, ["role_id", "Role_ID", "id"], "").strip()
+        else:
+            role_id = ""
+
+        if role_id:
+            baseline_roles.add(role_id)
+
+    if not baseline_roles:
+        raise ValueError("baseline_workforce has no valid role IDs")
+    return baseline_roles
+
+
 def role_priority_multiplier(role_id: str) -> float:
     domain = role_id.split("-")[0].upper()
     return PRIORITY_DOMAIN_MULTIPLIER.get(domain, 1.0)
@@ -201,13 +225,20 @@ def build_action(role_tks: RoleTKS, cost_data: RoleCost, option: str, weights: D
         + weights["knowledge"] * len(knowledge)
     )
 
-    score = base_score * cost_data.criticality_score * (1 + cost_data.risk_impact / 10)
-    score *= role_priority_multiplier(role_tks.role_id)
+    # Los pesos de foco (tasks/skills/knowledge) deben dominar la decisión.
+    # Factores estratégicos (criticidad/riesgo/prioridad) se aplican como ajustes moderados.
+    strategic_multiplier = 1.0
+    strategic_multiplier += max(0.0, cost_data.criticality_score - 1.0) * 0.20
+    strategic_multiplier += max(0.0, cost_data.risk_impact) * 0.10
+    strategic_multiplier += max(0.0, role_priority_multiplier(role_tks.role_id) - 1.0) * 0.25
+
+    score = base_score * strategic_multiplier
 
     if option == "hire":
-        score *= _hiring_speed_multiplier(cost_data.time_to_hire)
+        # Penalización suave por tiempos de contratación altos.
+        score *= 0.8 + (0.2 * _hiring_speed_multiplier(cost_data.time_to_hire))
     elif option == "outsource":
-        score *= 1.05  # respuesta rápida ante exposición operacional
+        score *= 1.03  # ligera ventaja por velocidad de respuesta
 
     return PlanAction(role_tks.role_id, option, cost, score, tasks, skills, knowledge)
 
@@ -216,6 +247,7 @@ def optimize_plan(
     roles_tks: Dict[str, RoleTKS],
     role_costs: Dict[str, RoleCost],
     risk_scenarios: Dict[str, Set[str]],
+    baseline_roles: Set[str],
     budget: float,
     weights: Dict[str, float],
 ) -> PlanResult:
@@ -223,41 +255,45 @@ def optimize_plan(
     if not available_roles:
         raise ValueError("No overlapping Role_ID values between NICE data and roles_costs.csv")
 
-    candidates: List[PlanAction] = []
+    role_actions: List[List[PlanAction]] = []
     for role_id in available_roles:
-        for option in ("hire", "upskill", "outsource"):
-            candidates.append(build_action(roles_tks[role_id], role_costs[role_id], option, weights))
+        options = ("upskill",) if role_id in baseline_roles else ("hire",)
+        actions = [build_action(roles_tks[role_id], role_costs[role_id], option, weights) for option in options]
+        role_actions.append(actions)
 
-    candidates.sort(key=lambda a: (a.score_gain / max(a.cost, 1), a.score_gain), reverse=True)
+    budget_cents = int(round(budget * 100))
 
-    selected: List[PlanAction] = []
-    selected_roles: Set[str] = set()
-    cost = 0.0
+    # Multiple-choice knapsack: por cada rol, se elige a lo sumo una acción.
+    # Estado: coste acumulado -> (score total, acciones seleccionadas)
+    dp: Dict[int, Tuple[float, List[PlanAction]]] = {0: (0.0, [])}
+
+    for actions in role_actions:
+        next_dp = dict(dp)  # opción de no seleccionar este rol
+        for used_cost, (used_score, used_actions) in dp.items():
+            for action in actions:
+                action_cost = int(round(action.cost * 100))
+                new_cost = used_cost + action_cost
+                if new_cost > budget_cents:
+                    continue
+
+                new_score = used_score + action.score_gain
+                new_actions = used_actions + [action]
+                current = next_dp.get(new_cost)
+                if current is None or new_score > current[0]:
+                    next_dp[new_cost] = (new_score, new_actions)
+        dp = next_dp
+
+    # Mejor combinación por score; desempate por mayor uso de presupuesto.
+    best_cost_cents, (total_score, selected) = max(dp.items(), key=lambda item: (item[1][0], item[0]))
+    cost = best_cost_cents / 100
+
     covered_tasks: Set[str] = set()
     covered_skills: Set[str] = set()
     covered_knowledge: Set[str] = set()
-    total_score = 0.0
-
-    for action in candidates:
-        if action.role_id in selected_roles:
-            continue
-        if cost + action.cost > budget:
-            continue
-        marginal = (
-            (action.covered_tasks - covered_tasks)
-            or (action.covered_skills - covered_skills)
-            or (action.covered_knowledge - covered_knowledge)
-        )
-        if not marginal:
-            continue
-
-        selected.append(action)
-        selected_roles.add(action.role_id)
-        cost += action.cost
+    for action in selected:
         covered_tasks |= action.covered_tasks
         covered_skills |= action.covered_skills
         covered_knowledge |= action.covered_knowledge
-        total_score += action.score_gain
 
     risk_reduction = {}
     for threat, required_tasks in risk_scenarios.items():
@@ -346,6 +382,7 @@ def parse_args() -> argparse.Namespace:
     plan.add_argument("--nice", required=True, type=Path)
     plan.add_argument("--roles", required=True, type=Path)
     plan.add_argument("--risk", required=True, type=Path)
+    plan.add_argument("--baseline-workforce", required=True, type=Path)
     plan.add_argument("--budget", type=float, default=DEFAULT_BUDGET)
     plan.add_argument("--focus", choices=["soc", "grc", "custom"], default="custom")
     plan.add_argument("--w-tasks", type=float, default=0.5)
@@ -386,8 +423,9 @@ def main() -> None:
     roles_tks = load_nice_tks(args.nice)
     role_costs = load_role_costs(args.roles)
     risk_scenarios = load_risk_scenarios(args.risk)
+    baseline_roles = load_baseline_workforce(args.baseline_workforce)
 
-    result = optimize_plan(roles_tks, role_costs, risk_scenarios, args.budget, weights)
+    result = optimize_plan(roles_tks, role_costs, risk_scenarios, baseline_roles, args.budget, weights)
     payload = json.dumps(_as_dict(result), indent=2, ensure_ascii=False)
 
     if args.output:

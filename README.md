@@ -32,6 +32,24 @@ Escenarios mínimos requeridos:
 - `DataLeaks`
 - `AuditFailures`
 
+### `baseline_workforce.json`
+Define los roles que actualmente existen en la empresa (Baseline Workforce).
+
+Para este proyecto se incluyen:
+- `PD-WRL-001`
+- `PD-WRL-003`
+- `IO-WRL-005`
+
+## Criterio de optimización
+
+El planificador usa una optimización tipo *multiple-choice knapsack* con workforce base: para cada rol selecciona como máximo una acción y busca la combinación que **maximiza el `weighted_score` total** sin superar el `budget`.
+
+Regla de workforce:
+- Si el rol está en `baseline_workforce`, sólo se permite `upskill` (ya existe en la empresa).
+- Si el rol no está en `baseline_workforce`, sólo se permite `hire` (debe contratarse).
+
+Esto evita sesgos por coste mínimo y asegura que, al añadir más filas/valores al CSV, se elija siempre la combinación con mejor score agregado dentro de presupuesto.
+
 ## Comando de optimización
 
 ```bash
@@ -39,6 +57,7 @@ python dss.py plan \
   --nice fixtures/nice_tks.json \
   --roles fixtures/roles_costs.csv \
   --risk fixtures/risk_scenarios.json \
+  --baseline-workforce fixtures/baseline_workforce.json \
   --budget 250000 \
   --focus soc \
   --dashboard

@@ -32,6 +32,12 @@ Escenarios mínimos requeridos:
 - `DataLeaks`
 - `AuditFailures`
 
+## Criterio de optimización
+
+El planificador usa una optimización tipo *multiple-choice knapsack*: para cada rol selecciona como máximo una acción (`hire`, `upskill` u `outsource`) y busca la combinación que **maximiza el `weighted_score` total** sin superar el `budget`.
+
+Esto evita sesgos por coste mínimo y asegura que, al añadir más filas/valores al CSV, se elija siempre la combinación con mejor score agregado dentro de presupuesto.
+
 ## Comando de optimización
 
 ```bash

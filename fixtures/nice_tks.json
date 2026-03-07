@@ -2,33 +2,253 @@
   "roles": [
     {
       "role_id": "PD-WRL-001",
-      "tasks": ["T1", "T2", "T3", "T4"],
-      "skills": ["S1", "S2", "S3"],
-      "knowledge": ["K1", "K2"]
+      "tasks": ["T100","T101","T102","T103","T104"],
+      "skills": ["S100","S101","S102","S103"],
+      "knowledge": ["K100","K101","K102"]
+    },
+    {
+      "role_id": "PD-WRL-002",
+      "tasks": ["T105","T106","T107","T108"],
+      "skills": ["S104","S105","S106"],
+      "knowledge": ["K103","K104"]
     },
     {
       "role_id": "PD-WRL-003",
-      "tasks": ["T8", "T9", "T10"],
-      "skills": ["S7", "S8"],
-      "knowledge": ["K6", "K7"]
+      "tasks": ["T109","T110","T111","T112"],
+      "skills": ["S107","S108","S109"],
+      "knowledge": ["K105","K106"]
+    },
+    {
+      "role_id": "PD-WRL-004",
+      "tasks": ["T113","T114","T115"],
+      "skills": ["S110","S111","S112"],
+      "knowledge": ["K107","K108"]
+    },
+    {
+      "role_id": "PD-WRL-005",
+      "tasks": ["T116","T117","T118"],
+      "skills": ["S113","S114","S115"],
+      "knowledge": ["K109","K110"]
     },
     {
       "role_id": "PD-WRL-006",
-      "tasks": ["T11", "T12"],
-      "skills": ["S9", "S10"],
-      "knowledge": ["K8"]
+      "tasks": ["T119","T120","T121"],
+      "skills": ["S116","S117","S118"],
+      "knowledge": ["K111","K112"]
+    },
+    {
+      "role_id": "PD-WRL-007",
+      "tasks": ["T122","T123","T124"],
+      "skills": ["S119","S120","S121"],
+      "knowledge": ["K113","K114"]
+    },
+
+    {
+      "role_id": "DD-WRL-001",
+      "tasks": ["T200","T201","T202"],
+      "skills": ["S200","S201","S202"],
+      "knowledge": ["K200","K201","K202","K203"]
     },
     {
       "role_id": "DD-WRL-002",
-      "tasks": ["T5", "T6"],
-      "skills": ["S4", "S5"],
-      "knowledge": ["K3", "K4"]
+      "tasks": ["T203","T204","T205"],
+      "skills": ["S203","S204","S205"],
+      "knowledge": ["K204","K205","K206"]
+    },
+    {
+      "role_id": "DD-WRL-003",
+      "tasks": ["T206","T207","T208"],
+      "skills": ["S206","S207","S208"],
+      "knowledge": ["K207","K208","K209"]
+    },
+    {
+      "role_id": "DD-WRL-004",
+      "tasks": ["T209","T210","T211"],
+      "skills": ["S209","S210","S211"],
+      "knowledge": ["K210","K211","K212"]
+    },
+    {
+      "role_id": "DD-WRL-005",
+      "tasks": ["T212","T213"],
+      "skills": ["S212","S213"],
+      "knowledge": ["K213","K214","K215"]
+    },
+    {
+      "role_id": "DD-WRL-006",
+      "tasks": ["T214","T215"],
+      "skills": ["S214","S215"],
+      "knowledge": ["K216","K217"]
+    },
+    {
+      "role_id": "DD-WRL-007",
+      "tasks": ["T216","T217"],
+      "skills": ["S216","S217"],
+      "knowledge": ["K218","K219"]
+    },
+    {
+      "role_id": "DD-WRL-008",
+      "tasks": ["T218","T219","T220"],
+      "skills": ["S218","S219","S220"],
+      "knowledge": ["K220","K221","K222"]
+    },
+    {
+      "role_id": "DD-WRL-009",
+      "tasks": ["T221","T222"],
+      "skills": ["S221","S222"],
+      "knowledge": ["K223","K224"]
+    },
+
+    {
+      "role_id": "IO-WRL-001",
+      "tasks": ["T300","T301","T302"],
+      "skills": ["S300","S301","S302"],
+      "knowledge": ["K300","K301"]
+    },
+    {
+      "role_id": "IO-WRL-002",
+      "tasks": ["T303","T304","T305"],
+      "skills": ["S303","S304","S305"],
+      "knowledge": ["K302","K303"]
+    },
+    {
+      "role_id": "IO-WRL-003",
+      "tasks": ["T306","T307"],
+      "skills": ["S306","S307"],
+      "knowledge": ["K304","K305"]
+    },
+    {
+      "role_id": "IO-WRL-004",
+      "tasks": ["T308","T309","T310"],
+      "skills": ["S308","S309","S310"],
+      "knowledge": ["K306","K307"]
     },
     {
       "role_id": "IO-WRL-005",
-      "tasks": ["T13", "T14"],
-      "skills": ["S11", "S12"],
-      "knowledge": ["K9", "K10"]
+      "tasks": ["T311","T312","T313"],
+      "skills": ["S311","S312","S313"],
+      "knowledge": ["K308","K309"]
+    },
+    {
+      "role_id": "IO-WRL-006",
+      "tasks": ["T314","T315"],
+      "skills": ["S314","S315"],
+      "knowledge": ["K310","K311"]
+    },
+    {
+      "role_id": "IO-WRL-007",
+      "tasks": ["T316","T317"],
+      "skills": ["S316","S317"],
+      "knowledge": ["K312","K313"]
+    },
+
+    {
+      "role_id": "OG-WRL-001",
+      "tasks": ["T400","T401"],
+      "skills": ["S400","S401"],
+      "knowledge": ["K400","K401","K402"]
+    },
+    {
+      "role_id": "OG-WRL-002",
+      "tasks": ["T402","T403"],
+      "skills": ["S402","S403"],
+      "knowledge": ["K403","K404","K405"]
+    },
+    {
+      "role_id": "OG-WRL-003",
+      "tasks": ["T404","T405"],
+      "skills": ["S404","S405"],
+      "knowledge": ["K406","K407","K408"]
+    },
+    {
+      "role_id": "OG-WRL-004",
+      "tasks": ["T406"],
+      "skills": ["S406","S407"],
+      "knowledge": ["K409","K410"]
+    },
+    {
+      "role_id": "OG-WRL-005",
+      "tasks": ["T407"],
+      "skills": ["S408","S409"],
+      "knowledge": ["K411","K412"]
+    },
+    {
+      "role_id": "OG-WRL-006",
+      "tasks": ["T408"],
+      "skills": ["S410"],
+      "knowledge": ["K413","K414","K415"]
+    },
+    {
+      "role_id": "OG-WRL-007",
+      "tasks": ["T409"],
+      "skills": ["S411"],
+      "knowledge": ["K416","K417","K418"]
+    },
+    {
+      "role_id": "OG-WRL-008",
+      "tasks": ["T410"],
+      "skills": ["S412"],
+      "knowledge": ["K419","K420"]
+    },
+    {
+      "role_id": "OG-WRL-009",
+      "tasks": ["T411"],
+      "skills": ["S413"],
+      "knowledge": ["K421","K422"]
+    },
+    {
+      "role_id": "OG-WRL-010",
+      "tasks": ["T412"],
+      "skills": ["S414"],
+      "knowledge": ["K423","K424"]
+    },
+    {
+      "role_id": "OG-WRL-011",
+      "tasks": ["T413"],
+      "skills": ["S415"],
+      "knowledge": ["K425","K426"]
+    },
+    {
+      "role_id": "OG-WRL-012",
+      "tasks": ["T414"],
+      "skills": ["S416"],
+      "knowledge": ["K427","K428"]
+    },
+    {
+      "role_id": "OG-WRL-013",
+      "tasks": ["T415"],
+      "skills": ["S417"],
+      "knowledge": ["K429","K430"]
+    },
+    {
+      "role_id": "OG-WRL-014",
+      "tasks": ["T416"],
+      "skills": ["S418"],
+      "knowledge": ["K431","K432"]
+    },
+    {
+      "role_id": "OG-WRL-015",
+      "tasks": ["T417"],
+      "skills": ["S419"],
+      "knowledge": ["K433","K434"]
+    },
+    {
+      "role_id": "OG-WRL-016",
+      "tasks": ["T418"],
+      "skills": ["S420"],
+      "knowledge": ["K435","K436"]
+    },
+
+    {
+      "role_id": "IN-WRL-001",
+      "tasks": ["T500","T501","T502"],
+      "skills": ["S500","S501"],
+      "knowledge": ["K500","K501"]
+    },
+    {
+      "role_id": "IN-WRL-002",
+      "tasks": ["T503","T504"],
+      "skills": ["S502","S503"],
+      "knowledge": ["K502","K503"]
     }
   ]
 }

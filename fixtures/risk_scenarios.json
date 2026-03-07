@@ -1,6 +1,32 @@
 {
-  "Ransomware": ["T1", "T2", "T4", "T9", "T11"],
-  "SupplyChainCompromise": ["T5", "T6", "T14"],
-  "DataLeaks": ["T3", "T8", "T13"],
-  "AuditFailures": ["T10", "T12", "T14"]
+  "Ransomware": [
+    "T100",
+    "T101",
+    "T109",
+    "T111",
+    "T311",
+    "T312"
+  ],
+  "SupplyChainCompromise": [
+    "T200",
+    "T203",
+    "T206",
+    "T214",
+    "T402",
+    "T404"
+  ],
+  "DataLeaks": [
+    "T303",
+    "T308",
+    "T311",
+    "T122",
+    "T410"
+  ],
+  "AuditFailures": [
+    "T400",
+    "T402",
+    "T414",
+    "T203",
+    "T305"
+  ]
 }

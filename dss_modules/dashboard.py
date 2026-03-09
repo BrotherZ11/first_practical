@@ -438,22 +438,6 @@ def generate_html_dashboard(
             }}
         }}
 
-        .text-hover li {{
-            transition: transform 0.2s ease, background 0.2s ease;
-            border-radius: 8px;
-        }}
-
-        .text-hover li:hover {{
-            transform: translateX(6px);
-            background: rgba(255,255,255,0.3);
-        }}
-
-        .dual-chart-grid {{
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 24px;
-        }}
-
         @media (prefers-reduced-motion: reduce) {{
             * {{
                 animation: none !important;
@@ -751,8 +735,8 @@ def generate_html_dashboard(
                 responsive: true,
                 maintainAspectRatio: false,
                 animation: {{
-                    duration: 1700,
-                    easing: 'easeOutElastic'
+                    duration: 1500,
+                    easing: 'easeOutBack'
                 }},
                 plugins: {{
                     title: {{

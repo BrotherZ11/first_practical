@@ -62,8 +62,12 @@ def generate_html_dashboard(
     
     # Actions breakdown
     actions_by_type = {"hire": 0, "upskill": 0, "outsource": 0}
+    option_costs = {"hire": 0.0, "upskill": 0.0, "outsource": 0.0}
     for action in result.selected_actions:
         actions_by_type[action.option] += 1
+        option_costs[action.option] += action.cost
+
+    risk_items = list(result.risk_reduction.items())
     
     html_template = f'''<!DOCTYPE html>
 <html lang="es">
@@ -174,6 +178,13 @@ def generate_html_dashboard(
             line-height: 1.8;
             color: #555;
             margin-bottom: 10px;
+            transition: transform 0.25s ease, color 0.25s ease;
+            transform-origin: left center;
+        }}
+
+        .case-study p:hover {{
+            transform: translateX(6px);
+            color: #1f2f53;
         }}
         
         .case-study .highlight {{
@@ -287,6 +298,15 @@ def generate_html_dashboard(
         
         .comparison-box .stat:last-child {{
             border-bottom: none;
+        }}
+
+        .comparison-box .stat:hover {{
+            background: rgba(255, 255, 255, 0.35);
+            border-radius: 8px;
+            padding-left: 8px;
+            padding-right: 8px;
+            transform: translateX(4px);
+            transition: all 0.2s ease;
         }}
         
         .comparison-box .label {{
@@ -426,6 +446,9 @@ def generate_html_dashboard(
         }}
         
         @media (max-width: 768px) {{
+            .dual-chart-grid {{
+                grid-template-columns: 1fr;
+            }}
             .comparison-container {{
                 grid-template-columns: 1fr;
             }}
@@ -546,6 +569,18 @@ def generate_html_dashboard(
                 <canvas id="riskChart"></canvas>
             </div>
         </div>
+
+        <div class="section animate-on-scroll">
+            <h2>🧭 Action Mix & Risk Positioning</h2>
+            <div class="dual-chart-grid">
+                <div class="chart-container animate-on-scroll">
+                    <canvas id="actionMixChart"></canvas>
+                </div>
+                <div class="chart-container animate-on-scroll">
+                    <canvas id="riskScatterChart"></canvas>
+                </div>
+            </div>
+        </div>
         
         <div class="section animate-on-scroll">
             <h2>📋 Recommended Actions</h2>
@@ -581,7 +616,7 @@ def generate_html_dashboard(
         <div class="section animate-on-scroll">
             <h2>💡 Key Insights & Recommendations</h2>
             <div class="comparison-box" style="background: linear-gradient(135deg, #fff5e6 0%, #ffe0b2 100%);">
-                <ul style="list-style: none; padding-left: 0;">
+                <ul class="text-hover" style="list-style: none; padding-left: 0;">
                     <li style="padding: 10px 0; border-bottom: 1px solid rgba(0,0,0,0.1);">
                         ✅ <strong>Coverage Improvement:</strong> Tasks increased by <span class="improvement">{((len(result.covered_tasks) - len(before_tasks)) / max(len(before_tasks), 1) * 100):.0f}%</span>, from {len(before_tasks)} to {len(result.covered_tasks)} tasks
                     </li>
@@ -723,6 +758,91 @@ def generate_html_dashboard(
                         ticks: {{
                             stepSize: 20
                         }}
+                    }}
+                }}
+            }}
+        }});
+
+        // Doughnut chart for action investment mix
+        const actionMixCtx = document.getElementById('actionMixChart').getContext('2d');
+        new Chart(actionMixCtx, {{
+            type: 'doughnut',
+            data: {{
+                labels: ['Hire', 'Upskill', 'Outsource'],
+                datasets: [{{
+                    data: [{option_costs['hire']:.2f}, {option_costs['upskill']:.2f}, {option_costs['outsource']:.2f}],
+                    backgroundColor: ['#28a745', '#ffc107', '#17a2b8'],
+                    hoverOffset: 14,
+                    borderWidth: 2,
+                    borderColor: '#ffffff'
+                }}]
+            }},
+            options: {{
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: {{
+                    animateRotate: true,
+                    animateScale: true,
+                    duration: 1400,
+                    easing: 'easeOutCirc'
+                }},
+                plugins: {{
+                    title: {{
+                        display: true,
+                        text: 'Investment Mix by Action Type',
+                        font: {{ size: 16, weight: 'bold' }}
+                    }},
+                    legend: {{ position: 'bottom' }}
+                }}
+            }}
+        }});
+
+        // Scatter chart for risk scenarios (coverage vs priority proxy)
+        const riskScatterCtx = document.getElementById('riskScatterChart').getContext('2d');
+        new Chart(riskScatterCtx, {{
+            type: 'scatter',
+            data: {{
+                datasets: [{{
+                    label: 'Threat Scenarios',
+                    data: {[
+                        {'x': round(v, 2), 'y': i + 1} for i, (_, v) in enumerate(risk_items)
+                    ]},
+                    pointRadius: 7,
+                    pointHoverRadius: 10,
+                    backgroundColor: 'rgba(102, 126, 234, 0.75)',
+                    borderColor: 'rgba(42, 82, 152, 1)',
+                    borderWidth: 2
+                }}]
+            }},
+            options: {{
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: {{
+                    duration: 1500,
+                    easing: 'easeOutBounce'
+                }},
+                plugins: {{
+                    title: {{
+                        display: true,
+                        text: 'Risk Coverage Distribution',
+                        font: {{ size: 16, weight: 'bold' }}
+                    }},
+                    tooltip: {{
+                        callbacks: {{
+                            label: (context) => `Coverage: ${{context.parsed.x}}% | Scenario #${{context.parsed.y}}`
+                        }}
+                    }}
+                }},
+                scales: {{
+                    x: {{
+                        min: 0,
+                        max: 100,
+                        title: {{ display: true, text: 'Coverage %' }}
+                    }},
+                    y: {{
+                        beginAtZero: true,
+                        title: {{ display: true, text: 'Scenario Index' }},
+                        ticks: {{ stepSize: 1 }}
                     }}
                 }}
             }}

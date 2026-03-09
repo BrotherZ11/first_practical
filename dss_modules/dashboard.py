@@ -84,8 +84,37 @@ def generate_html_dashboard(
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             padding: 20px;
             color: #333;
+            position: relative;
+            min-height: 100vh;
         }}
-        
+
+        body::before,
+        body::after {{
+            content: '';
+            position: fixed;
+            width: 380px;
+            height: 380px;
+            border-radius: 50%;
+            z-index: 0;
+            filter: blur(8px);
+            opacity: 0.35;
+            pointer-events: none;
+            animation: floatBlob 14s ease-in-out infinite;
+        }}
+
+        body::before {{
+            top: -120px;
+            left: -80px;
+            background: radial-gradient(circle, #7cf7ff 0%, rgba(124, 247, 255, 0.05) 75%);
+        }}
+
+        body::after {{
+            right: -100px;
+            bottom: -130px;
+            background: radial-gradient(circle, #ffc6ec 0%, rgba(255, 198, 236, 0.05) 75%);
+            animation-delay: 3s;
+        }}
+
         .container {{
             max-width: 1400px;
             margin: 0 auto;
@@ -93,6 +122,8 @@ def generate_html_dashboard(
             border-radius: 20px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             overflow: hidden;
+            position: relative;
+            z-index: 1;
         }}
         
         header {{
@@ -100,6 +131,17 @@ def generate_html_dashboard(
             color: white;
             padding: 40px;
             text-align: center;
+            position: relative;
+            overflow: hidden;
+        }}
+
+        header::after {{
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(120deg, transparent 0%, rgba(255,255,255,0.22) 45%, transparent 100%);
+            transform: translateX(-120%);
+            animation: headerShine 8s linear infinite;
         }}
         
         header h1 {{
@@ -119,6 +161,7 @@ def generate_html_dashboard(
             border-left: 5px solid #667eea;
             margin: 30px 40px;
             border-radius: 10px;
+            box-shadow: 0 12px 25px rgba(80, 92, 124, 0.14);
         }}
         
         .case-study h2 {{
@@ -153,7 +196,17 @@ def generate_html_dashboard(
             padding: 25px;
             border-radius: 15px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            transition: transform 0.3s ease;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }}
+
+        .metric-card::after {{
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.32), transparent 55%);
+            opacity: 0.5;
         }}
         
         .metric-card:hover {{
@@ -203,6 +256,12 @@ def generate_html_dashboard(
             padding: 25px;
             border-radius: 12px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }}
+
+        .comparison-box:hover {{
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.14);
         }}
         
         .before-box {{
@@ -248,6 +307,12 @@ def generate_html_dashboard(
             background: white;
             border-radius: 12px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.4s ease, box-shadow 0.4s ease;
+        }}
+
+        .chart-container:hover {{
+            transform: translateY(-2px) scale(1.01);
+            box-shadow: 0 14px 25px rgba(0,0,0,0.12);
         }}
         
         .actions-table {{
@@ -280,6 +345,11 @@ def generate_html_dashboard(
         
         .actions-table tbody tr:hover {{
             background: #f5f7fa;
+            transform: scale(1.004);
+        }}
+
+        .actions-table tbody tr {{
+            transition: all 0.25s ease;
         }}
         
         .badge {{
@@ -318,6 +388,42 @@ def generate_html_dashboard(
             color: #666;
             font-size: 0.9em;
         }}
+
+        .animate-on-scroll {{
+            opacity: 0;
+            transform: translateY(24px);
+            transition: opacity 0.7s ease, transform 0.7s ease;
+        }}
+
+        .animate-on-scroll.is-visible {{
+            opacity: 1;
+            transform: translateY(0);
+        }}
+
+        @keyframes floatBlob {{
+            0%, 100% {{
+                transform: translateY(0) translateX(0) scale(1);
+            }}
+            50% {{
+                transform: translateY(18px) translateX(10px) scale(1.08);
+            }}
+        }}
+
+        @keyframes headerShine {{
+            0% {{
+                transform: translateX(-120%);
+            }}
+            100% {{
+                transform: translateX(120%);
+            }}
+        }}
+
+        @media (prefers-reduced-motion: reduce) {{
+            * {{
+                animation: none !important;
+                transition: none !important;
+            }}
+        }}
         
         @media (max-width: 768px) {{
             .comparison-container {{
@@ -336,8 +442,8 @@ def generate_html_dashboard(
             <h1>🛡️ CISO Executive Dashboard</h1>
             <p>Cybersecurity Workforce Optimization Plan</p>
         </header>
-        
-        <div class="case-study">
+
+        <div class="case-study animate-on-scroll">
             <h2>📊 Case Study: FinTech Corp Security Transformation</h2>
             <p><strong>Company:</strong> Mid-sized financial technology company with 500 employees</p>
             <p><strong>Challenge:</strong> Limited cybersecurity team struggling to manage increasing threats including <span class="highlight">ransomware attacks</span>, <span class="highlight">supply chain compromises</span>, <span class="highlight">data leakage</span>, and <span class="highlight">compliance audit failures</span>.</p>
@@ -346,29 +452,29 @@ def generate_html_dashboard(
         </div>
         
         <div class="metrics-grid">
-            <div class="metric-card">
+            <div class="metric-card animate-on-scroll">
                 <h3>Budget Utilization</h3>
                 <div class="value">{budget_used_pct:.1f}%</div>
                 <div class="subtext">${result.total_cost:,.0f} / ${budget:,.0f}</div>
             </div>
-            <div class="metric-card">
+            <div class="metric-card animate-on-scroll">
                 <h3>Roles Optimized</h3>
                 <div class="value">{len(result.selected_actions)}</div>
                 <div class="subtext">{len(baseline_roles)} baseline → {len(after_roles)} total</div>
             </div>
-            <div class="metric-card">
+            <div class="metric-card animate-on-scroll">
                 <h3>Capability Score</h3>
                 <div class="value">{result.weighted_score:.0f}</div>
                 <div class="subtext">Weighted by {focus.upper()} focus</div>
             </div>
-            <div class="metric-card">
+            <div class="metric-card animate-on-scroll">
                 <h3>Avg Risk Coverage</h3>
                 <div class="value">{sum(result.risk_reduction.values()) / len(result.risk_reduction):.0f}%</div>
                 <div class="subtext">Across {len(result.risk_reduction)} threat scenarios</div>
             </div>
         </div>
         
-        <div class="section">
+        <div class="section animate-on-scroll">
             <h2>📈 Before vs. After Analysis</h2>
             
             <div class="comparison-container">
@@ -429,19 +535,19 @@ def generate_html_dashboard(
                 </div>
             </div>
             
-            <div class="chart-container">
+            <div class="chart-container animate-on-scroll">
                 <canvas id="coverageChart"></canvas>
             </div>
         </div>
         
-        <div class="section">
+        <div class="section animate-on-scroll">
             <h2>🎯 Risk Reduction Analysis</h2>
-            <div class="chart-container">
+            <div class="chart-container animate-on-scroll">
                 <canvas id="riskChart"></canvas>
             </div>
         </div>
         
-        <div class="section">
+        <div class="section animate-on-scroll">
             <h2>📋 Recommended Actions</h2>
             <table class="actions-table">
                 <thead>
@@ -472,7 +578,7 @@ def generate_html_dashboard(
             </table>
         </div>
         
-        <div class="section">
+        <div class="section animate-on-scroll">
             <h2>💡 Key Insights & Recommendations</h2>
             <div class="comparison-box" style="background: linear-gradient(135deg, #fff5e6 0%, #ffe0b2 100%);">
                 <ul style="list-style: none; padding-left: 0;">
@@ -499,6 +605,19 @@ def generate_html_dashboard(
     </div>
     
     <script>
+        // Scroll reveal animations
+        const revealObserver = new IntersectionObserver((entries) => {{
+            entries.forEach((entry) => {{
+                if (entry.isIntersecting) {{
+                    entry.target.classList.add('is-visible');
+                }}
+            }});
+        }}, {{ threshold: 0.15 }});
+
+        document.querySelectorAll('.animate-on-scroll').forEach((element) => {{
+            revealObserver.observe(element);
+        }});
+
         // Coverage Comparison Chart
         const coverageCtx = document.getElementById('coverageChart').getContext('2d');
         new Chart(coverageCtx, {{
@@ -525,6 +644,10 @@ def generate_html_dashboard(
             options: {{
                 responsive: true,
                 maintainAspectRatio: false,
+                animation: {{
+                    duration: 1300,
+                    easing: 'easeOutQuart'
+                }},
                 plugins: {{
                     title: {{
                         display: true,
@@ -559,7 +682,7 @@ def generate_html_dashboard(
                 datasets: [
                     {{
                         label: 'Before (0% Coverage)',
-                        data: [0, 0, 0, 0],
+                        data: {([0] * len(result.risk_reduction))},
                         backgroundColor: 'rgba(220, 53, 69, 0.2)',
                         borderColor: 'rgba(220, 53, 69, 1)',
                         borderWidth: 2
@@ -576,6 +699,10 @@ def generate_html_dashboard(
             options: {{
                 responsive: true,
                 maintainAspectRatio: false,
+                animation: {{
+                    duration: 1500,
+                    easing: 'easeOutBack'
+                }},
                 plugins: {{
                     title: {{
                         display: true,

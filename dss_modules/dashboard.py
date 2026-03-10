@@ -328,11 +328,123 @@ def generate_html_dashboard(
                 grid-template-columns: 1fr;
             }}
         }}
+
+        /* ===== ANIMACIONES ===== */
+        @keyframes fadeInUp {{
+            from {{ opacity: 0; transform: translateY(40px); }}
+            to   {{ opacity: 1; transform: translateY(0); }}
+        }}
+        @keyframes fadeInDown {{
+            from {{ opacity: 0; transform: translateY(-40px); }}
+            to   {{ opacity: 1; transform: translateY(0); }}
+        }}
+        @keyframes slideInLeft {{
+            from {{ opacity: 0; transform: translateX(-60px); }}
+            to   {{ opacity: 1; transform: translateX(0); }}
+        }}
+        @keyframes slideInRight {{
+            from {{ opacity: 0; transform: translateX(60px); }}
+            to   {{ opacity: 1; transform: translateX(0); }}
+        }}
+        @keyframes scaleIn {{
+            from {{ opacity: 0; transform: scale(0.8); }}
+            to   {{ opacity: 1; transform: scale(1); }}
+        }}
+        @keyframes pulseValue {{
+            0%   {{ transform: scale(1); }}
+            50%  {{ transform: scale(1.08); }}
+            100% {{ transform: scale(1); }}
+        }}
+        @keyframes shimmer {{
+            0%   {{ background-position: -200% center; }}
+            100% {{ background-position:  200% center; }}
+        }}
+        @keyframes progressFill {{
+            from {{ width: 0; }}
+            to   {{ width: var(--target-width); }}
+        }}
+
+        /* Ocultar hasta que IntersectionObserver dispare .visible */
+        .anim-fadeup    {{ opacity: 0; }}
+        .anim-left      {{ opacity: 0; }}
+        .anim-right     {{ opacity: 0; }}
+        .anim-scale     {{ opacity: 0; }}
+        .anim-fadedown  {{ opacity: 0; }}
+
+        .anim-fadeup.visible   {{ animation: fadeInUp    0.7s ease forwards; }}
+        .anim-left.visible     {{ animation: slideInLeft 0.7s ease forwards; }}
+        .anim-right.visible    {{ animation: slideInRight 0.7s ease forwards; }}
+        .anim-scale.visible    {{ animation: scaleIn     0.6s ease forwards; }}
+        .anim-fadedown.visible {{ animation: fadeInDown  0.7s ease forwards; }}
+
+        /* Retardos escalonados para las metric-card */
+        .metric-card:nth-child(1) {{ animation-delay: 0.0s; }}
+        .metric-card:nth-child(2) {{ animation-delay: 0.15s; }}
+        .metric-card:nth-child(3) {{ animation-delay: 0.30s; }}
+        .metric-card:nth-child(4) {{ animation-delay: 0.45s; }}
+
+        /* Shimmer en el header */
+        .header-shimmer {{
+            background: linear-gradient(90deg,
+                rgba(255,255,255,0) 0%,
+                rgba(255,255,255,0.25) 50%,
+                rgba(255,255,255,0) 100%);
+            background-size: 200% auto;
+            animation: shimmer 3s linear infinite;
+            position: absolute; inset: 0; border-radius: inherit;
+            pointer-events: none;
+        }}
+        header {{ position: relative; overflow: hidden; }}
+
+        /* Pulse en los counters de las tarjetas */
+        .metric-card.visible .value {{
+            animation: pulseValue 0.5s ease 0.8s both;
+        }}
+
+        /* Barra de progreso animada de presupuesto */
+        .budget-bar-wrap {{
+            background: rgba(255,255,255,0.25);
+            border-radius: 20px;
+            height: 8px;
+            margin-top: 8px;
+            overflow: hidden;
+        }}
+        .budget-bar {{
+            height: 100%;
+            border-radius: 20px;
+            background: #fff;
+            width: 0;
+            transition: none;
+        }}
+        .budget-bar.animate {{
+            animation: progressFill 1.2s ease 0.5s forwards;
+        }}
+
+        /* Hover en chart-container */
+        .chart-container {{
+            transition: box-shadow 0.3s ease, transform 0.3s ease;
+        }}
+        .chart-container:hover {{
+            transform: translateY(-4px);
+            box-shadow: 0 12px 35px rgba(0,0,0,0.15);
+        }}
+
+        /* Grid de gráficas lado a lado */
+        .charts-row {{
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }}
+        @media (max-width: 900px) {{
+            .charts-row {{ grid-template-columns: 1fr; }}
+        }}
     </style>
 </head>
 <body>
     <div class="container">
-        <header>
+        <header class="anim-fadedown visible">
+            <div class="header-shimmer"></div>
             <h1>🛡️ CISO Executive Dashboard</h1>
             <p>Cybersecurity Workforce Optimization Plan</p>
         </header>
@@ -346,22 +458,23 @@ def generate_html_dashboard(
         </div>
         
         <div class="metrics-grid">
-            <div class="metric-card">
+            <div class="metric-card anim-fadeup">
                 <h3>Budget Utilization</h3>
                 <div class="value">{budget_used_pct:.1f}%</div>
                 <div class="subtext">${result.total_cost:,.0f} / ${budget:,.0f}</div>
+                <div class="budget-bar-wrap"><div class="budget-bar" style="--target-width:{min(budget_used_pct,100):.1f}%"></div></div>
             </div>
-            <div class="metric-card">
+            <div class="metric-card anim-fadeup">
                 <h3>Roles Optimized</h3>
                 <div class="value">{len(result.selected_actions)}</div>
                 <div class="subtext">{len(baseline_roles)} baseline → {len(after_roles)} total</div>
             </div>
-            <div class="metric-card">
+            <div class="metric-card anim-fadeup">
                 <h3>Capability Score</h3>
                 <div class="value">{result.weighted_score:.0f}</div>
                 <div class="subtext">Weighted by {focus.upper()} focus</div>
             </div>
-            <div class="metric-card">
+            <div class="metric-card anim-fadeup">
                 <h3>Avg Risk Coverage</h3>
                 <div class="value">{sum(result.risk_reduction.values()) / len(result.risk_reduction):.0f}%</div>
                 <div class="subtext">Across {len(result.risk_reduction)} threat scenarios</div>
@@ -372,7 +485,7 @@ def generate_html_dashboard(
             <h2>📈 Before vs. After Analysis</h2>
             
             <div class="comparison-container">
-                <div class="comparison-box before-box">
+                <div class="comparison-box before-box anim-left">
                     <h3>❌ BEFORE - Current State</h3>
                     <div class="stat">
                         <span class="label">Security Roles:</span>
@@ -400,7 +513,7 @@ def generate_html_dashboard(
                     </div>
                 </div>
                 
-                <div class="comparison-box after-box">
+                <div class="comparison-box after-box anim-right">
                     <h3>✅ AFTER - Optimized State</h3>
                     <div class="stat">
                         <span class="label">Security Roles:</span>
@@ -429,15 +542,20 @@ def generate_html_dashboard(
                 </div>
             </div>
             
-            <div class="chart-container">
+            <div class="chart-container anim-fadeup">
                 <canvas id="coverageChart"></canvas>
             </div>
         </div>
-        
+
         <div class="section">
-            <h2>🎯 Risk Reduction Analysis</h2>
-            <div class="chart-container">
-                <canvas id="riskChart"></canvas>
+            <h2>🎯 Risk Reduction &amp; Actions Breakdown</h2>
+            <div class="charts-row">
+                <div class="chart-container anim-left" style="height:380px; margin-bottom:0;">
+                    <canvas id="riskChart"></canvas>
+                </div>
+                <div class="chart-container anim-right" style="height:380px; margin-bottom:0;">
+                    <canvas id="donutChart"></canvas>
+                </div>
             </div>
         </div>
         
@@ -499,7 +617,33 @@ def generate_html_dashboard(
     </div>
     
     <script>
-        // Coverage Comparison Chart
+        /* ── Animación de entrada via IntersectionObserver ── */
+        const observer = new IntersectionObserver((entries) => {{
+            entries.forEach(e => {{
+                if (e.isIntersecting) {{
+                    e.target.classList.add('visible');
+                    // barra de presupuesto
+                    const bar = e.target.querySelector('.budget-bar');
+                    if (bar) bar.classList.add('animate');
+                    observer.unobserve(e.target);
+                }}
+            }});
+        }}, {{ threshold: 0.15 }});
+        document.querySelectorAll('.anim-fadeup, .anim-left, .anim-right, .anim-scale').forEach(el => observer.observe(el));
+
+        /* ── Opciones de animación reutilizables ── */
+        const animOpts = {{
+            animation: {{
+                duration: 1200,
+                easing: 'easeOutQuart',
+                delay: (ctx) => ctx.dataIndex * 120
+            }},
+            transitions: {{
+                active: {{ animation: {{ duration: 400 }} }}
+            }}
+        }};
+
+        /* ── Coverage Comparison Chart (barras animadas) ── */
         const coverageCtx = document.getElementById('coverageChart').getContext('2d');
         new Chart(coverageCtx, {{
             type: 'bar',
@@ -509,48 +653,52 @@ def generate_html_dashboard(
                     {{
                         label: 'Before (Current State)',
                         data: [{len(before_tasks)}, {len(before_skills)}, {len(before_knowledge)}],
-                        backgroundColor: 'rgba(220, 53, 69, 0.7)',
+                        backgroundColor: 'rgba(220, 53, 69, 0.75)',
                         borderColor: 'rgba(220, 53, 69, 1)',
-                        borderWidth: 2
+                        borderWidth: 2,
+                        borderRadius: 8,
+                        borderSkipped: false
                     }},
                     {{
                         label: 'After (Optimized State)',
                         data: [{len(result.covered_tasks)}, {len(result.covered_skills)}, {len(result.covered_knowledge)}],
-                        backgroundColor: 'rgba(40, 167, 69, 0.7)',
+                        backgroundColor: 'rgba(40, 167, 69, 0.75)',
                         borderColor: 'rgba(40, 167, 69, 1)',
-                        borderWidth: 2
+                        borderWidth: 2,
+                        borderRadius: 8,
+                        borderSkipped: false
                     }}
                 ]
             }},
             options: {{
+                ...animOpts,
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {{
                     title: {{
                         display: true,
                         text: 'Capability Coverage: Before vs. After',
-                        font: {{
-                            size: 18,
-                            weight: 'bold'
-                        }}
+                        font: {{ size: 18, weight: 'bold' }}
                     }},
-                    legend: {{
-                        position: 'top',
+                    legend: {{ position: 'top' }},
+                    tooltip: {{
+                        callbacks: {{
+                            label: ctx => ` ${{ctx.dataset.label}}: ${{ctx.parsed.y}}`
+                        }}
                     }}
                 }},
                 scales: {{
                     y: {{
                         beginAtZero: true,
-                        title: {{
-                            display: true,
-                            text: 'Number of Capabilities'
-                        }}
-                    }}
+                        title: {{ display: true, text: 'Number of Capabilities' }},
+                        grid: {{ color: 'rgba(0,0,0,0.05)' }}
+                    }},
+                    x: {{ grid: {{ display: false }} }}
                 }}
             }}
         }});
-        
-        // Risk Reduction Chart
+
+        /* ── Risk Radar Chart (animado) ── */
         const riskCtx = document.getElementById('riskChart').getContext('2d');
         new Chart(riskCtx, {{
             type: 'radar',
@@ -559,42 +707,82 @@ def generate_html_dashboard(
                 datasets: [
                     {{
                         label: 'Before (0% Coverage)',
-                        data: [0, 0, 0, 0],
+                        data: {[0]*len(result.risk_reduction)},
                         backgroundColor: 'rgba(220, 53, 69, 0.2)',
                         borderColor: 'rgba(220, 53, 69, 1)',
-                        borderWidth: 2
+                        borderWidth: 2,
+                        pointBackgroundColor: 'rgba(220, 53, 69, 1)'
                     }},
                     {{
                         label: 'After (Optimized Coverage)',
                         data: {list(result.risk_reduction.values())},
                         backgroundColor: 'rgba(40, 167, 69, 0.2)',
                         borderColor: 'rgba(40, 167, 69, 1)',
-                        borderWidth: 2
+                        borderWidth: 2,
+                        pointBackgroundColor: 'rgba(40, 167, 69, 1)'
                     }}
                 ]
             }},
             options: {{
+                animation: {{ duration: 1400, easing: 'easeOutElastic' }},
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {{
                     title: {{
                         display: true,
                         text: 'Threat Scenario Coverage (%)',
-                        font: {{
-                            size: 18,
-                            weight: 'bold'
-                        }}
+                        font: {{ size: 16, weight: 'bold' }}
                     }},
-                    legend: {{
-                        position: 'top',
-                    }}
+                    legend: {{ position: 'top' }}
                 }},
                 scales: {{
                     r: {{
-                        beginAtZero: true,
-                        max: 100,
-                        ticks: {{
-                            stepSize: 20
+                        beginAtZero: true, max: 100,
+                        ticks: {{ stepSize: 20 }},
+                        grid: {{ color: 'rgba(0,0,0,0.1)' }}
+                    }}
+                }}
+            }}
+        }});
+
+        /* ── Donut Chart – Actions Breakdown ── */
+        const donutCtx = document.getElementById('donutChart').getContext('2d');
+        new Chart(donutCtx, {{
+            type: 'doughnut',
+            data: {{
+                labels: ['Hire 🟢', 'Upskill 🟡', 'Outsource 🔵'],
+                datasets: [{{
+                    data: [{actions_by_type['hire']}, {actions_by_type['upskill']}, {actions_by_type['outsource']}],
+                    backgroundColor: [
+                        'rgba(40,  167,  69, 0.85)',
+                        'rgba(255, 193,   7, 0.85)',
+                        'rgba( 23, 162, 184, 0.85)'
+                    ],
+                    borderColor: ['#28a745','#ffc107','#17a2b8'],
+                    borderWidth: 3,
+                    hoverOffset: 18
+                }}]
+            }},
+            options: {{
+                animation: {{
+                    animateRotate: true,
+                    animateScale: true,
+                    duration: 1500,
+                    easing: 'easeOutBounce'
+                }},
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '62%',
+                plugins: {{
+                    title: {{
+                        display: true,
+                        text: 'Actions Breakdown – Invest Distribution',
+                        font: {{ size: 16, weight: 'bold' }}
+                    }},
+                    legend: {{ position: 'bottom' }},
+                    tooltip: {{
+                        callbacks: {{
+                            label: ctx => ` ${{ctx.label}}: ${{ctx.parsed}} action(s)`
                         }}
                     }}
                 }}
